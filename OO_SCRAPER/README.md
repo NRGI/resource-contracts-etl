@@ -13,6 +13,6 @@
 
 *run scraper*
 
-```python scraper.py [-o | --output] [-s | --source]```
+```python scrape.py [-o | --output] [-s | --source]```
 
 If flags arent set, scraper will point towards default [OO wiki page](http://repository.openoil.net/wiki/Downloads). Data will write to `./resource-contracts-etl/OO_SCRAPER/`.
