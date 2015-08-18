@@ -22,4 +22,5 @@ Temporary Items
 
 
 # contract repo files
-*.pdf
+# *.pdf
+# OO_SCRAPER/contracts
