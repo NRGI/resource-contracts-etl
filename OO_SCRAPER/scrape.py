@@ -305,8 +305,8 @@ if __name__ == '__main__':
     getCountryList(data, out_csv, SOURCE_URL)
     # write out data
     LOGGER.info('Writing data to %s' % (DEST_FILE))
-    with open(DEST_PATH + '/contract_csv.csv', 'w') as outfile_csv:
-        csv_writer = csv.writer(outfile_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    with open(DEST_PATH + '/contract_csv.tsv', 'w') as outfile_csv:
+        csv_writer = csv.writer(outfile_csv, delimiter='	', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for row in out_csv:
             csv_writer.writerow(row)
     
