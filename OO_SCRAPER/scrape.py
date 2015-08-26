@@ -7,6 +7,7 @@ from datetime import datetime
 from time import strftime
 import time
 import json
+import csv
 import logging
 LOGGER = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
@@ -155,10 +156,10 @@ def getCountryMeta(data, url):
     LOGGER.info('Contract metadata retrieved, moving on (elapsed time - %d seconds)' % (elapsed_time))
 
 
-def getCountryList(data, url):
+def getCountryList(data, out_csv, url):
     '''Scrape Open Oil contract repo front page table of country contract repositories
     for index pages and basic country metadata'''
-    # Get seed list of pages to parse
+   # Get seed list of pages to parse
     main_req = requests.get(url)
     main_cont = main_req.content
     main_soup = BeautifulSoup(main_cont, 'html.parser')
@@ -232,10 +233,39 @@ def getCountryList(data, url):
             getCountryMeta(main_row_data, main_row_data['oo_wiki_index_url'])
             # add to record
             data.append(main_row_data)
-            # # Test on single Country
+            for csv_contract in main_row_data['contract_data']:
+                csv_array = []
+                csv_array.append(csv_contract['contract_title'])
+                csv_array.append(csv_contract['contract_title_type'])
+                csv_array.append(csv_contract['contract_contractor'])
+                csv_array.append(csv_contract['contract_link'])
+                csv_array.append(main_row_data['country_ID'])
+                csv_array.append('')
+                csv_array.append(csv_contract['contract_signed_date'])
+                csv_array.append(csv_contract['contract_language'])
+                csv_array.append(csv_contract['contract_disclosure'])
+                csv_array.append(csv_contract['contract_host_gov_contract'])
+                out_csv.append(csv_array)
+
+            # # # Test on single Country
             # if main_row_data['country_ID'] == 'AL':
             #     main_row_data['contract_data'] = []
             #     getCountryMeta(main_row_data, main_row_data['oo_wiki_index_url'])
+            #     for csv_contract in main_row_data['contract_data']:
+            #         csv_array = []
+            #         csv_array.append(csv_contract['contract_title'])
+            #         csv_array.append(csv_contract['contract_title_type'])
+            #         csv_array.append(csv_contract['contract_contractor'])
+            #         csv_array.append(csv_contract['contract_link'])
+            #         csv_array.append(main_row_data['country_ID'])
+            #         csv_array.append('')
+            #         csv_array.append(csv_contract['contract_signed_date'])
+            #         csv_array.append(csv_contract['contract_language'])
+            #         csv_array.append(csv_contract['contract_disclosure'])
+            #         csv_array.append(csv_contract['contract_host_gov_contract'])
+            #         out_csv.append(csv_array)
+                    
+            #     PP.pprint(main_row_data)
             #     data.append(main_row_data)
 
 if __name__ == '__main__':
@@ -269,10 +299,17 @@ if __name__ == '__main__':
 
     # initiate data object
     data = []
+    # Initiate out csv
+    out_csv = [['Contract','Title','Company','PDF URL','Country','Concession/License name','Signature date','Language','Disclosure mode', 'Host gov contract']]
     # parse website
-    getCountryList(data, SOURCE_URL)
+    getCountryList(data, out_csv, SOURCE_URL)
     # write out data
     LOGGER.info('Writing data to %s' % (DEST_FILE))
+    with open(DEST_PATH + '/contract_csv.csv', 'w') as outfile_csv:
+        csv_writer = csv.writer(outfile_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for row in out_csv:
+            csv_writer.writerow(row)
+    
     with open(DEST_FILE, 'w') as outfile:
         outfile.write(json.dumps(data))
     LOGGER.info('Contracts and metadata retrieved - %d seconds' % (time.time() - START_TIME))
